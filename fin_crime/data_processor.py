@@ -1,6 +1,5 @@
 from pathlib import Path
 import os
-import uuid
 
 import pandas as pd
 
@@ -18,8 +17,9 @@ class DataProcessor:
         self.output_dir = output_dir
         os.makedirs(self.output_dir, exist_ok=True)
 
-    def process(self,
-                input_path: str):
+    def process_raw(self,
+                    input_path: str):
+        """Processes the raw data and saves the processed data as a parquet file."""
         cur_file_path = Path(input_path)
         cur_file_name = cur_file_path.stem
 
@@ -43,3 +43,16 @@ class DataProcessor:
             path=os.path.join(self.output_dir, f"{cur_file_name}.parquet"),
             index=False
         )
+
+    @staticmethod
+    def process(df: pd.DataFrame):
+        """Process a DataFrame of raw data"""
+        # Hour of the transaction
+        if "trans_date_trans_time" in df.columns:
+            df["trans_hour"] = df["trans_date_trans_time"].dt.hour
+
+        # Age of the client at transaction
+        if all(True for x in ["trans_date_trans_time", "dob"] if x in df.columns):
+            df["age_at_transaction"] = (df["trans_date_trans_time"] - df["dob"]) / pd.Timedelta("365d")
+
+        return df
