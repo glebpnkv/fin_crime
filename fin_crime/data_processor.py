@@ -65,8 +65,13 @@ class DataProcessor:
 
     def process(self, df: pd.DataFrame):
         """Process a DataFrame of raw data"""
+        # Sorting df
+        df = df.sort_values(
+            by=["cc_num", "trans_date_trans_time"],
+            ignore_index=True
+        )
         # Load US geography
-        df_usa = gpd.read_file(os.path.join(self.cache_dir, 'states_shp/cb_2018_us_state_500k.shp'))
+        df_usa = gpd.read_file(os.path.join(self.cache_dir, "states_shp/cb_2018_us_state_500k.shp"))
 
         # Hour of the transaction
         if "trans_date_trans_time" in df.columns:
@@ -79,11 +84,11 @@ class DataProcessor:
         # State of cardholder
         if all(True for x in ["long", "lat"] if x in df.columns):
             dfg_card = gpd.GeoDataFrame(
-                df[['trans_num', 'long', 'lat']],
-                geometry=gpd.points_from_xy(df['long'], df['lat']),
+                df[["trans_num", "long", "lat"]],
+                geometry=gpd.points_from_xy(df["long"], df["lat"]),
                 crs="EPSG:4269"
             )
-            df["card_state"] = gpd.sjoin(dfg_card, df_usa[['STUSPS', 'geometry']], how='left')["STUSPS"]
+            df["card_state"] = gpd.sjoin(dfg_card, df_usa[["STUSPS", "geometry"]], how="left")["STUSPS"]
             df["card_state"] = df["card_state"].fillna("NaN")
 
         # State of merchant
