@@ -6,6 +6,7 @@ conda create --name fincrime -c conda-forge \
   pyarrow \
   scikit-learn \
   seaborn \
+  shap \
   tqdm \
   xgboost \
   jupyterlab -y
